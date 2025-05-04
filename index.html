@@ -5,10 +5,12 @@
   <title>Мониторинг Minecraft-сервера</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Сброс и базовые стили */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #0f0f1c; color: #e0e0e0;
+      background: linear-gradient(-45deg, #0f0f1c, #1a1a2f, #0c1b2c, #1f1f38);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #e0e0e0;
       font-family: 'Segoe UI', Tahoma, sans-serif;
       line-height: 1.4; padding: 20px;
     }
@@ -28,7 +30,6 @@
     .server-header h1 {
       font-size: 26px; color: #00ffaa; margin-bottom: 5px;
     }
-    .server-header .wipe { font-size: 14px; color: #aaa; }
     .status-badge {
       padding: 8px 16px; border-radius: 20px;
       font-weight: bold; font-size: 14px;
@@ -89,13 +90,42 @@
       transform: scale(0.96);
     }
 
-    /* Анимации */
+    .progress-bar {
+      background: #2b2b3f; border-radius: 8px; overflow: hidden;
+      height: 20px; margin: 10px 0;
+    }
+    .progress-bar-fill {
+      background: #00ffaa; height: 100%; width: 0%;
+      transition: width 0.5s;
+    }
+
+    .banner {
+      margin-top: 30px; text-align: center;
+    }
+    .banner img {
+      max-width: 100%; border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,255,170,0.1);
+    }
+
+    .top-banner {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .top-banner img {
+      max-width: 100%; height: auto;
+    }
+
     @keyframes fadeInUp {
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     @media (max-width: 600px) {
@@ -107,18 +137,24 @@
   </style>
 </head>
 <body>
+<div class="top-banner">
+  <img src="http://www.minecraft.mix-servers.com/assets/main/img/logo/6.png" alt="Minecraft Banner">
+</div>
 <div class="container">
   <div class="server-card">
     <div class="server-header">
       <div class="info">
         <h1>Industrial (1.5.2)</h1>
-        <div class="wipe">Wipe: 30.04.2025</div>
       </div>
       <div id="status-indicator" class="status-badge status-online">ONLINE</div>
     </div>
 
     <div class="section-title">
       Игроки онлайн: <span id="status-count">0/100</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progress-bar"></div>
     </div>
 
     <div class="players" id="online-list">
@@ -132,32 +168,28 @@
 </div>
 
 <script>
-const DEFAULT_HEAD = 'steve.png'; // в папке рядом с index.html
+const DEFAULT_HEAD = 'steve.png';
 const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
 
 async function fetchStatus() {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
-
-    // обновляем статус и счёт
     const online = data.online;
     const count = data.players?.online || 0;
     const max   = data.players?.max || 0;
-    document.getElementById('status-indicator')
-      .textContent = online ? 'ONLINE' : 'OFFLINE';
+    document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
     document.getElementById('status-indicator').className =
       'status-badge ' + (online ? 'status-online' : 'status-offline');
-    document.getElementById('status-count')
-      .textContent = `${count}/${max}`;
+    document.getElementById('status-count').textContent = `${count}/${max}`;
 
-    // рисуем игроков
+    const progress = (count / max) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+
     const players = data.players?.list || [];
     const list = document.getElementById('online-list');
     if (!players.length) {
-      list.innerHTML = `<div class="player" style="opacity:1;transform:none;">
-        Нет игроков онлайн
-      </div>`;
+      list.innerHTML = `<div class="player" style="opacity:1;transform:none;">Нет игроков онлайн</div>`;
     } else {
       list.innerHTML = '';
       players.forEach((name, i) => {
@@ -165,14 +197,12 @@ async function fetchStatus() {
         div.className = 'player';
         div.style.animationDelay = `${i * 0.05}s`;
 
-        // canvas для головы
         const canvas = document.createElement('canvas');
         canvas.width = canvas.height = 32;
         canvas.className = 'head';
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
-        // рисуем либо скин, либо заглушку
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
@@ -203,12 +233,12 @@ async function fetchStatus() {
       });
     }
   } catch {
-    document.getElementById('online-list').innerHTML =
-      `<div class="player" style="opacity:1;transform:none;">Ошибка загрузки</div>`;
+    document.getElementById('online-list').innerHTML = `<div class="player" style="opacity:1;transform:none;">Ошибка загрузки</div>`;
   }
 }
 
 fetchStatus();
+setInterval(fetchStatus, 60000);
 </script>
 </body>
 </html>
