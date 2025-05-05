@@ -2,243 +2,227 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Мониторинг Minecraft-сервера</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мониторинг Minecraft-сервера</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: linear-gradient(-45deg, #0f0f1c, #1a1a2f, #0c1b2c, #1f1f38);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      line-height: 1.4; padding: 20px;
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
     }
+
     .container {
-      max-width: 1000px; margin: 0 auto;
-      animation: fadeIn 1s ease-in-out;
+      max-width: 960px;
+      margin: auto;
     }
+
     .server-card {
-      background: #1c1c2e; border-radius: 12px;
-      padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
+
     .server-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
-    .server-header .info { display: flex; flex-direction: column; }
-    .server-header h1 {
-      font-size: 26px; color: #00ffaa; margin-bottom: 5px;
+
+    h1 {
+      font-size: 24px;
+      color: #00ffaa;
     }
+
     .status-badge {
-      padding: 8px 16px; border-radius: 20px;
-      font-weight: bold; font-size: 14px;
-      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
     }
-    .status-online { background: #2ecc71; color: #0f0f1c; }
-    .status-offline { background: #e74c3c; color: #0f0f1c; }
+
+    .status-online { background: #2ecc71; color: #000; }
+    .status-offline { background: #e74c3c; color: #000; }
 
     .section-title {
-      font-size: 18px; font-weight: bold;
-      margin-bottom: 15px; border-bottom: 1px solid #333;
-      padding-bottom: 8px; color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      background: #2a2a2a;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 18px;
+      margin-bottom: 16px;
+    }
+
+    .progress-bar-fill {
+      background: #00ffaa;
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s ease;
     }
 
     .players {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
     }
+
     .player {
-      display: flex; align-items: center; gap: 10px;
-      background: #2b2b3f; border-radius: 8px;
-      padding: 10px; font-size: 14px; color: #ddd;
-      overflow: hidden; opacity: 0; transform: translateY(10px);
-      animation: fadeInUp 0.4s forwards;
+      display: flex;
+      align-items: center;
+      background: #2a2a2a;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+      overflow: hidden;
     }
+
     .player:hover {
-      background: #35354a;
-      transform: scale(1.02);
-      transition: transform 0.2s ease, background 0.2s ease;
+      background: #333;
     }
 
     .head {
-      width: 32px; height: 32px;
-      border-radius: 6px; background-color: #111;
-      flex-shrink: 0; border: 1px solid #555;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      margin-right: 10px;
+      flex-shrink: 0;
     }
+
     .player span {
-      overflow: hidden; text-overflow: ellipsis;
-      white-space: nowrap; display: block;
-      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      max-width: 100%;
     }
 
     .refresh-button {
-      margin-top: 20px; text-align: center;
+      text-align: center;
+      margin-top: 20px;
     }
+
     .refresh-button button {
-      background-color: #00ffaa; border: none;
-      color: #0f0f1c; padding: 10px 20px;
-      font-size: 14px; border-radius: 8px;
-      cursor: pointer; font-weight: bold;
-      transition: background 0.3s, transform 0.1s;
+      background-color: #00ffaa;
+      border: none;
+      color: #000;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
+
     .refresh-button button:hover {
       background-color: #00dd99;
-    }
-    .refresh-button button:active {
-      transform: scale(0.96);
-    }
-
-    .progress-bar {
-      background: #2b2b3f; border-radius: 8px; overflow: hidden;
-      height: 20px; margin: 10px 0;
-    }
-    .progress-bar-fill {
-      background: #00ffaa; height: 100%; width: 0%;
-      transition: width 0.5s;
-    }
-
-    .banner {
-      margin-top: 30px; text-align: center;
-    }
-    .banner img {
-      max-width: 100%; border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,255,170,0.1);
-    }
-
-    .top-banner {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .top-banner img {
-      max-width: 100%; height: auto;
-    }
-
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     @media (max-width: 600px) {
       .server-header {
-        flex-direction: column; align-items: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 10px;
       }
     }
   </style>
 </head>
 <body>
-<div class="top-banner">
-  <img src="logo.png" alt="Minecraft Banner">
-</div>
-<div class="container">
-  <div class="server-card">
-    <div class="server-header">
-      <div class="info">
+  <div class="container">
+    <div class="server-card">
+      <div class="server-header">
         <h1>Industrial (1.5.2)</h1>
+        <div id="status-indicator" class="status-badge status-online">ONLINE</div>
       </div>
-      <div id="status-indicator" class="status-badge status-online">ONLINE</div>
-    </div>
 
-    <div class="section-title">
-      Игроки онлайн: <span id="status-count">0/100</span>
-    </div>
+      <div class="section-title">Игроки онлайн: <span id="status-count">0/100</span></div>
+      <div class="progress-bar"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
 
-    <div class="progress-bar">
-      <div class="progress-bar-fill" id="progress-bar"></div>
-    </div>
-
-    <div class="players" id="online-list">
-      <div class="player" style="opacity:1;transform:none;">Загрузка…</div>
-    </div>
-
-    <div class="refresh-button">
-      <button onclick="fetchStatus()">Обновить</button>
+      <div class="refresh-button">
+        <button onclick="fetchStatus()">Обновить</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-const DEFAULT_HEAD = 'steve.png';
-const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
+  <script>
+    const DEFAULT_HEAD = 'steve.png';
+    const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
 
-async function fetchStatus() {
-  try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    const online = data.online;
-    const count = data.players?.online || 0;
-    const max   = data.players?.max || 0;
-    document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
-    document.getElementById('status-indicator').className =
-      'status-badge ' + (online ? 'status-online' : 'status-offline');
-    document.getElementById('status-count').textContent = `${count}/${max}`;
+    async function fetchStatus() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        const online = data.online;
+        const count = data.players?.online || 0;
+        const max = data.players?.max || 0;
 
-    const progress = (count / max) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
+        document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
+        document.getElementById('status-indicator').className =
+          'status-badge ' + (online ? 'status-online' : 'status-offline');
 
-    const players = data.players?.list || [];
-    const list = document.getElementById('online-list');
-    if (!players.length) {
-      list.innerHTML = `<div class="player" style="opacity:1;transform:none;">Нет игроков онлайн</div>`;
-    } else {
-      list.innerHTML = '';
-      players.forEach((name, i) => {
-        const div = document.createElement('div');
-        div.className = 'player';
-        div.style.animationDelay = `${i * 0.05}s`;
+        document.getElementById('status-count').textContent = `${count}/${max}`;
+        document.getElementById('progress-bar').style.width = `${(count / max) * 100}%`;
 
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = 32;
-        canvas.className = 'head';
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
+        const players = data.players?.list || [];
+        const list = document.getElementById('online-list');
 
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
-        img.onload = () => draw(img, ctx);
-        img.onerror = () => {
-          const stub = new Image();
-          stub.src = DEFAULT_HEAD;
-          stub.onload = () => draw(stub, ctx);
-        };
+        list.innerHTML = players.length
+          ? ''
+          : '<div class="player">Нет игроков онлайн</div>';
 
-        function draw(img, ctx) {
-          if (img.width === 64 && img.height === 32) {
-            ctx.drawImage(img, 8,8,8,8, 0,0,32,32);
-            ctx.drawImage(img,40,8,8,8, 0,0,32,32);
-          } else {
-            const s = img.width / 64;
-            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
-            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
+        players.forEach(name => {
+          const div = document.createElement('div');
+          div.className = 'player';
+
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 32;
+          canvas.className = 'head';
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
+          img.onload = () => draw(img, ctx);
+          img.onerror = () => {
+            const stub = new Image();
+            stub.src = DEFAULT_HEAD;
+            stub.onload = () => draw(stub, ctx);
+          };
+
+          function draw(img, ctx) {
+            if (img.width === 64 && img.height === 32) {
+              ctx.drawImage(img, 8,8,8,8, 0,0,32,32);
+              ctx.drawImage(img,40,8,8,8, 0,0,32,32);
+            } else {
+              const s = img.width / 64;
+              ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
+              ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
+            }
           }
-        }
 
-        const label = document.createElement('span');
-        label.textContent = name;
-        label.title = name;
+          const label = document.createElement('span');
+          label.textContent = name;
+          label.title = name;
 
-        div.append(canvas, label);
-        list.append(div);
-      });
+          div.append(canvas, label);
+          list.append(div);
+        });
+      } catch {
+        document.getElementById('online-list').innerHTML = '<div class="player">Ошибка загрузки</div>';
+      }
     }
-  } catch {
-    document.getElementById('online-list').innerHTML = `<div class="player" style="opacity:1;transform:none;">Ошибка загрузки</div>`;
-  }
-}
 
-fetchStatus();
-setInterval(fetchStatus, 60000);
-</script>
+    fetchStatus();
+    setInterval(fetchStatus, 60000);
+  </script>
 </body>
 </html>
