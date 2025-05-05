@@ -11,11 +11,13 @@
       color: #ffffff;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
+      flex-direction: row;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
       padding: 40px 20px;
       gap: 40px;
+      flex-wrap: wrap;
     }
 
     .card, .discord-panel {
@@ -97,6 +99,14 @@
       border-color: #ed4245;
     }
 
+    .player.vip {
+      border-color: #ffaa00;
+    }
+
+    .player.admin {
+      border-color: #5865f2;
+    }
+
     .player:hover {
       background: #2b2d31;
     }
@@ -165,8 +175,7 @@
 
     .discord-widget {
       width: 100%;
-      height: 100%;
-      min-height: 560px;
+      height: 560px;
       border: none;
       border-radius: 8px;
     }
@@ -178,7 +187,6 @@
       text-align: center;
     }
 
-    /* Добавляем стили для логотипа */
     .logo-container {
       display: flex;
       justify-content: center;
@@ -191,20 +199,38 @@
       height: auto;
     }
 
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px 10px;
+      }
+
+      .card, .discord-panel {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .discord-panel {
+        order: 2;
+      }
+
+      .card {
+        order: 1;
+      }
+    }
   </style>
 </head>
 <body>
-  <body>
-    <div class="card" id="main-card">
-      <div class="logo-container">
-        <img src="logo.png" alt="Логотип сервера" class="logo" />
-      </div>
-      
-      <div class="header">
-        <h1>Industrial (1.5.2)</h1>
-        <div id="status-indicator" class="status-badge">ONLINE</div>
-      </div>
-  
+  <div class="card" id="main-card">
+    <div class="logo-container">
+      <img src="logo.png" alt="Логотип сервера" class="logo" />
+    </div>
+
+    <div class="header">
+      <h1>Industrial (1.5.2)</h1>
+      <div id="status-indicator" class="status-badge">ONLINE</div>
+    </div>
 
     <div>Игроки онлайн: <span id="status-count">0/100</span></div>
     <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
@@ -232,7 +258,9 @@
   <script>
     const DEFAULT_HEAD = 'steve.png';
     const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
-    const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic"];
+    const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic",];
+    const VIPS = ["Egzotik"];
+    const ADMINS = ["C4acTJluBa9l"];
 
     async function fetchStatus() {
       try {
@@ -259,9 +287,10 @@
         players.forEach(name => {
           const div = document.createElement('div');
           div.className = 'player';
-          if (MODERATORS.includes(name)) {
-            div.classList.add('moderator');
-          }
+
+          if (MODERATORS.includes(name)) div.classList.add('moderator');
+          if (VIPS.includes(name)) div.classList.add('vip');
+          if (ADMINS.includes(name)) div.classList.add('admin');
 
           const canvas = document.createElement('canvas');
           canvas.width = canvas.height = 32;
@@ -300,13 +329,6 @@
 
         const now = new Date();
         document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString()}`;
-
-        // Выравнивание высот
-        const main = document.getElementById('main-card');
-        const discord = document.getElementById('discord-panel');
-        const maxHeight = Math.max(main.offsetHeight, discord.offsetHeight);
-        main.style.height = discord.style.height = maxHeight + 'px';
-
       } catch {
         document.getElementById('online-list').innerHTML = '<div class="player">Ошибка загрузки</div>';
       }
