@@ -1,97 +1,110 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Мониторинг Minecraft-сервера</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #121212;
-      color: #f0f0f0;
+      background-color: #2b2d31;
+      color: #ffffff;
       font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      gap: 40px;
     }
 
-    .container {
-      max-width: 960px;
-      margin: auto;
+    .card, .discord-panel {
+      background: #313338;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 720px;
+      box-shadow: 0 0 24px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
     }
 
-    .server-card {
-      background: #1e1e1e;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    .card:hover, .discord-panel:hover {
+      transform: translateY(-2px);
     }
 
-    .server-header {
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
     }
 
     h1 {
-      font-size: 24px;
-      color: #00ffaa;
+      font-size: 20px;
+      color: #ffffff;
     }
 
     .status-badge {
       padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
+      border-radius: 9999px;
+      font-size: 12px;
       font-weight: 600;
+      background-color: #3ba55d;
+      color: #fff;
+      transition: background 0.3s ease;
     }
 
-    .status-online { background: #2ecc71; color: #000; }
-    .status-offline { background: #e74c3c; color: #000; }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 10px;
+    .status-offline {
+      background-color: #ed4245;
     }
 
-    .progress-bar {
-      background: #2a2a2a;
-      border-radius: 6px;
+    .progress {
+      background: #232428;
+      border-radius: 8px;
+      height: 10px;
       overflow: hidden;
-      height: 18px;
-      margin-bottom: 16px;
+      margin: 12px 0 24px;
     }
 
-    .progress-bar-fill {
-      background: #00ffaa;
+    .progress-fill {
+      background-color: #3ba55d;
       height: 100%;
       width: 0%;
-      transition: width 0.5s ease;
+      transition: width 0.4s ease;
     }
 
     .players {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
     }
 
     .player {
       display: flex;
       align-items: center;
-      background: #2a2a2a;
-      padding: 8px;
-      border-radius: 6px;
+      background: #1e1f22;
+      padding: 8px 12px;
+      border-radius: 8px;
       transition: background 0.2s;
       overflow: hidden;
+      border: 2px solid transparent;
+    }
+
+    .player.moderator {
+      border-color: #ed4245;
     }
 
     .player:hover {
-      background: #333;
+      background: #2b2d31;
     }
 
     .head {
       width: 32px;
       height: 32px;
-      border-radius: 4px;
+      border-radius: 6px;
       margin-right: 10px;
       flex-shrink: 0;
     }
@@ -100,61 +113,126 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: block;
       max-width: 100%;
+      font-size: 14px;
     }
 
     .refresh-button {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
     .refresh-button button {
-      background-color: #00ffaa;
+      background: #5865f2;
       border: none;
-      color: #000;
+      color: white;
       padding: 10px 20px;
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 500;
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
 
     .refresh-button button:hover {
-      background-color: #00dd99;
+      background: #4752c4;
     }
 
-    @media (max-width: 600px) {
-      .server-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
+    .discord-panel {
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 14px;
     }
+
+    .discord-panel h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .discord-panel p, .discord-panel ul li {
+      font-size: 14px;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .discord-panel ul {
+      margin-bottom: 16px;
+      padding-left: 18px;
+    }
+
+    .discord-widget {
+      width: 100%;
+      height: 100%;
+      min-height: 560px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    .timestamp {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #b0b3b8;
+      text-align: center;
+    }
+
+    /* Добавляем стили для логотипа */
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      max-width: 100%;
+      height: auto;
+    }
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="server-card">
-      <div class="server-header">
+  <body>
+    <div class="card" id="main-card">
+      <div class="logo-container">
+        <img src="logo.png" alt="Логотип сервера" class="logo" />
+      </div>
+      
+      <div class="header">
         <h1>Industrial (1.5.2)</h1>
-        <div id="status-indicator" class="status-badge status-online">ONLINE</div>
+        <div id="status-indicator" class="status-badge">ONLINE</div>
       </div>
+  
 
-      <div class="section-title">Игроки онлайн: <span id="status-count">0/100</span></div>
-      <div class="progress-bar"><div class="progress-bar-fill" id="progress-bar"></div></div>
-      <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
+    <div>Игроки онлайн: <span id="status-count">0/100</span></div>
+    <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
+    <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
 
-      <div class="refresh-button">
-        <button onclick="fetchStatus()">Обновить</button>
-      </div>
+    <div class="refresh-button">
+      <button onclick="fetchStatus()">Обновить</button>
     </div>
+    <div class="timestamp" id="last-updated"></div>
+  </div>
+
+  <div class="discord-panel" id="discord-panel">
+    <div>
+      <h2>Discord-сервер</h2>
+      <p>Следите за онлайном и получайте уведомления в Discord! У нас работает бот с:</p>
+      <ul>
+        <li>🔔 Моментальным обновлением онлайна</li>
+        <li>👥 Подписками на игроков</li>
+        <li>📬 Уведомлениями о входе/выходе друзей</li>
+      </ul>
+    </div>
+    <iframe class="discord-widget" src="https://discord.com/widget?id=1360566172936048843&theme=dark" allowtransparency="true"></iframe>
   </div>
 
   <script>
     const DEFAULT_HEAD = 'steve.png';
     const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
+    const MODERATORS = ["AdminName1", "ModName2"];
 
     async function fetchStatus() {
       try {
@@ -166,7 +244,7 @@
 
         document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
         document.getElementById('status-indicator').className =
-          'status-badge ' + (online ? 'status-online' : 'status-offline');
+          'status-badge ' + (online ? '' : 'status-offline');
 
         document.getElementById('status-count').textContent = `${count}/${max}`;
         document.getElementById('progress-bar').style.width = `${(count / max) * 100}%`;
@@ -181,6 +259,9 @@
         players.forEach(name => {
           const div = document.createElement('div');
           div.className = 'player';
+          if (MODERATORS.includes(name)) {
+            div.classList.add('moderator');
+          }
 
           const canvas = document.createElement('canvas');
           canvas.width = canvas.height = 32;
@@ -216,6 +297,16 @@
           div.append(canvas, label);
           list.append(div);
         });
+
+        const now = new Date();
+        document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString()}`;
+
+        // Выравнивание высот
+        const main = document.getElementById('main-card');
+        const discord = document.getElementById('discord-panel');
+        const maxHeight = Math.max(main.offsetHeight, discord.offsetHeight);
+        main.style.height = discord.style.height = maxHeight + 'px';
+
       } catch {
         document.getElementById('online-list').innerHTML = '<div class="player">Ошибка загрузки</div>';
       }
