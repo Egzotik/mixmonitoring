@@ -171,6 +171,12 @@
       max-width: 100%;
       height: auto;
     }
+    .last-wipe {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #b0b3b8;
+      text-align: center;
+    }
     @media (max-width: 768px) {
       body {
         flex-direction: column;
@@ -206,6 +212,7 @@
       <button onclick="fetchStatus()">Обновить</button>
     </div>
     <div class="timestamp" id="last-updated"></div>
+    <div class="last-wipe" id="last-wipe">Дата последнего вайпа: Неизвестно</div> <!-- Блок для даты вайпа -->
   </div>
 
   <div class="discord-panel" id="discord-panel">
@@ -292,6 +299,11 @@
           div.append(canvas, label);
           list.append(div);
         });
+
+        // Дата последнего вайпа из MOTD
+        const motd = data.motd || "";
+        const lastWipe = motd.includes('wipe') ? motd.split(' ')[1] : 'Неизвестно';
+        document.getElementById('last-wipe').textContent = `Дата последнего вайпа: ${lastWipe}`;
 
         const now = new Date();
         document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString()}`;
