@@ -19,7 +19,6 @@
       gap: 40px;
       flex-wrap: wrap;
     }
-
     .card, .discord-panel {
       background: #313338;
       border-radius: 16px;
@@ -32,23 +31,19 @@
       display: flex;
       flex-direction: column;
     }
-
     .card:hover, .discord-panel:hover {
       transform: translateY(-2px);
     }
-
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
     }
-
     h1 {
       font-size: 20px;
       color: #ffffff;
     }
-
     .status-badge {
       padding: 6px 14px;
       border-radius: 9999px;
@@ -58,11 +53,9 @@
       color: #fff;
       transition: background 0.3s ease;
     }
-
     .status-offline {
       background-color: #ed4245;
     }
-
     .progress {
       background: #232428;
       border-radius: 8px;
@@ -70,20 +63,17 @@
       overflow: hidden;
       margin: 12px 0 24px;
     }
-
     .progress-fill {
       background-color: #3ba55d;
       height: 100%;
       width: 0%;
       transition: width 0.4s ease;
     }
-
     .players {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 12px;
     }
-
     .player {
       display: flex;
       align-items: center;
@@ -94,23 +84,18 @@
       overflow: hidden;
       border: 2px solid transparent;
     }
-
     .player.moderator {
       border-color: #ed4245;
     }
-
     .player.vip {
       border-color: #ffaa00;
     }
-
     .player.admin {
       border-color: #5865f2;
     }
-
     .player:hover {
       background: #2b2d31;
     }
-
     .head {
       width: 32px;
       height: 32px;
@@ -118,7 +103,6 @@
       margin-right: 10px;
       flex-shrink: 0;
     }
-
     .player span {
       white-space: nowrap;
       overflow: hidden;
@@ -126,12 +110,10 @@
       max-width: 100%;
       font-size: 14px;
     }
-
     .refresh-button {
       text-align: center;
       margin-top: 30px;
     }
-
     .refresh-button button {
       background: #5865f2;
       border: none;
@@ -143,11 +125,9 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
     .refresh-button button:hover {
       background: #4752c4;
     }
-
     .discord-panel {
       max-width: 350px;
       display: flex;
@@ -155,66 +135,55 @@
       justify-content: space-between;
       font-size: 14px;
     }
-
     .discord-panel h2 {
       font-size: 20px;
       margin-bottom: 10px;
       color: #ffffff;
     }
-
     .discord-panel p, .discord-panel ul li {
       font-size: 14px;
       color: #ffffff;
       margin-bottom: 10px;
     }
-
     .discord-panel ul {
       margin-bottom: 16px;
       padding-left: 18px;
     }
-
     .discord-widget {
       width: 100%;
       height: 560px;
       border: none;
       border-radius: 8px;
     }
-
     .timestamp {
       margin-top: 12px;
       font-size: 12px;
       color: #b0b3b8;
       text-align: center;
     }
-
     .logo-container {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 24px;
     }
-
     .logo {
       max-width: 100%;
       height: auto;
     }
-
     @media (max-width: 768px) {
       body {
         flex-direction: column;
         align-items: stretch;
         padding: 20px 10px;
       }
-
       .card, .discord-panel {
         max-width: 100%;
         width: 100%;
       }
-
       .discord-panel {
         order: 2;
       }
-
       .card {
         order: 1;
       }
@@ -226,16 +195,13 @@
     <div class="logo-container">
       <img src="logo.png" alt="Логотип сервера" class="logo" />
     </div>
-
     <div class="header">
       <h1>Industrial (1.5.2)</h1>
       <div id="status-indicator" class="status-badge">ONLINE</div>
     </div>
-
     <div>Игроки онлайн: <span id="status-count">0/100</span></div>
     <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
     <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
-
     <div class="refresh-button">
       <button onclick="fetchStatus()">Обновить</button>
     </div>
@@ -257,7 +223,7 @@
 
   <script>
     const DEFAULT_HEAD = 'steve.png';
-    const API_URL = 'https://api.mcsrvstat.us/2/88.99.104.215:25566';
+    const API_URL = 'https://mcstatus-api-iena.onrender.com/api/status';
     const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic",];
     const VIPS = ["Egzotik"];
     const ADMINS = ["C4acTJluBa9l"];
@@ -266,7 +232,7 @@
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        const online = data.online;
+        const online = data.status === "online"; // проверяем статус
         const count = data.players?.online || 0;
         const max = data.players?.max || 0;
 
