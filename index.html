@@ -307,8 +307,15 @@
 
         const now = new Date();
         document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString()}`;
-      } catch {
-        document.getElementById('online-list').innerHTML = '<div class="player">Ошибка загрузки</div>';
+      } catch (error) {
+        console.error('Ошибка получения статуса сервера:', error);
+        document.getElementById('status-indicator').textContent = 'OFFLINE';
+        document.getElementById('status-indicator').className = 'status-badge status-offline';
+        document.getElementById('status-count').textContent = '0/0';
+        document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('online-list').innerHTML = '<div class="player">Сервер недоступен</div>';
+        document.getElementById('last-updated').textContent = `Последнее обновление: ${new Date().toLocaleTimeString()}`;
+        document.getElementById('last-wipe').textContent = 'Дата последнего вайпа: Неизвестно';
       }
     }
 
