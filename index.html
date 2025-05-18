@@ -44,7 +44,7 @@
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 12px; /* Отступ между элементами внутри header-left */
     }
     h1 {
       font-size: 20px;
@@ -58,6 +58,9 @@
       background-color: #2f9b2a;
       color: #fff;
       transition: background 0.3s ease;
+      /* Добавляем правый отступ, чтобы создать пробел */
+      margin-right: 12px;
+      white-space: nowrap;
     }
     .status-offline {
       background-color: #ed4245;
@@ -71,6 +74,12 @@
       font-size: 14px;
       width: 100%;
       max-width: 250px;
+    }
+    #online-stats {
+      color: #b0b3b8;
+      font-size: 14px;
+      margin-bottom: 8px;
+      text-align: center;
     }
     .progress {
       background: #232428;
@@ -147,7 +156,7 @@
       transition: background 0.3s ease;
     }
     .refresh-button button:hover {
-      background: #4752c4;
+      background-color: #4752c4;
     }
     .discord-panel {
       max-width: 350px;
@@ -192,6 +201,11 @@
       </div>
       <input type="text" class="search-input" placeholder="Поиск" id="searchInput" />
     </div>
+    <div id="online-stats">
+      <span>Текущий онлайн: <strong id="current-online">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
+      <span>Пиковый онлайн сегодня: <strong id="peak-today">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
+      <span>Пиковый онлайн вчера: <strong id="peak-yesterday">0</strong></span>
+    </div>
     <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
     <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
     <div class="refresh-button">
@@ -212,6 +226,7 @@
     const DEFAULT_HEAD = 'steve.png';
     const API_URL = 'https://mcstatus-api-iena.onrender.com/api/status';
     const ACTIVITY_API = 'https://mcstatus-api-iena.onrender.com/api/activity';
+    const PEAK_API = 'https://mcstatus-api-iena.onrender.com/api/peak';
     const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic"];
     const VIPS = ["Egzotik"];
     const ADMINS = ["C4acTJluBa9l"];
@@ -234,6 +249,19 @@
     function refreshAll() {
       fetchStatus();
       fetchActivity();
+      fetchPeak();
+    }
+
+    async function fetchPeak() {
+      try {
+        const res = await fetch(PEAK_API);
+        const data = await res.json();
+
+        document.getElementById('peak-today').textContent = data.today || 0;
+        document.getElementById('peak-yesterday').textContent = data.yesterday || 0;
+      } catch (error) {
+        console.error('Ошибка загрузки пикового онлайна:', error);
+      }
     }
 
     async function fetchStatus() {
@@ -243,6 +271,8 @@
         const online = data.status === "online";
         const count = data.players?.online || 0;
         const max = data.players?.max || 0;
+
+        document.getElementById('current-online').textContent = count;
 
         document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
         document.getElementById('status-indicator').className = 'status-badge ' + (online ? '' : 'status-offline');
@@ -370,10 +400,8 @@
       }
     }
 
-    fetchStatus();
-    fetchActivity();
-    setInterval(fetchStatus, 60000);
-    setInterval(fetchActivity, 60000);
+    refreshAll();
+    setInterval(refreshAll, 60000);
   </script>
 </body>
 </html>
