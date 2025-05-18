@@ -41,6 +41,11 @@
       align-items: center;
       margin-bottom: 24px;
     }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     h1 {
       font-size: 20px;
       color: #ffffff;
@@ -56,6 +61,16 @@
     }
     .status-offline {
       background-color: #ed4245;
+    }
+    .search-input {
+      background: #232428;
+      color: #ffffff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      max-width: 250px;
     }
     .progress {
       background: #232428;
@@ -84,20 +99,14 @@
       transition: background 0.2s;
       overflow: hidden;
       border: 2px solid transparent;
+      position: relative;
+      cursor: pointer;
     }
-    .player.moderator {
-      border-color: #ed4245;
-    }
-    .player.vip {
-      border-color: #ffaa00;
-    }
-    .player.admin {
-      border-color: #5865f2;
-    }
-    .player:hover {
-      background: #2b2d31;
-    }
-    .head {
+    .player.moderator { border-color: #ed4245; }
+    .player.vip { border-color: #ffaa00; }
+    .player.admin { border-color: #5865f2; }
+    .player:hover { background: #2b2d31; }
+    .player .head {
       width: 32px;
       height: 32px;
       border-radius: 6px;
@@ -111,6 +120,17 @@
       max-width: 100%;
       font-size: 14px;
     }
+    .activity-indicator {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    .activity-joined { background-color: #2f9b2a; }
+    .activity-left { background-color: #ed4245; }
     .refresh-button {
       text-align: center;
       margin-top: 30px;
@@ -133,28 +153,8 @@
       max-width: 350px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       font-size: 14px;
-    }
-    .discord-panel h2 {
-      font-size: 20px;
-      margin-bottom: 10px;
-      color: #ffffff;
-    }
-    .discord-panel p, .discord-panel ul li {
-      font-size: 14px;
-      color: #ffffff;
-      margin-bottom: 10px;
-    }
-    .discord-panel ul {
-      margin-bottom: 16px;
-      padding-left: 18px;
-    }
-    .discord-widget {
-      width: 100%;
-      height: 560px;
-      border: none;
-      border-radius: 8px;
+      gap: 16px;
     }
     .timestamp {
       margin-top: 12px;
@@ -178,23 +178,6 @@
       color: #b0b3b8;
       text-align: center;
     }
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 20px 10px;
-      }
-      .card, .discord-panel {
-        max-width: 100%;
-        width: 100%;
-      }
-      .discord-panel {
-        order: 2;
-      }
-      .card {
-        order: 1;
-      }
-    }
   </style>
 </head>
 <body>
@@ -203,65 +186,75 @@
       <img src="logo.png" alt="Логотип сервера" class="logo" />
     </div>
     <div class="header">
-      <h1>Industrial</h1>
-      <div id="status-indicator" class="status-badge">ONLINE</div>
+      <div class="header-left">
+        <h1>Industrial</h1>
+        <div id="status-indicator" class="status-badge">ONLINE</div>
+      </div>
+      <input type="text" class="search-input" placeholder="Поиск" id="searchInput" />
     </div>
-    <div>Игроки онлайн: <span id="status-count">0/100</span></div>
     <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
     <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
     <div class="refresh-button">
-      <button onclick="fetchStatus()">Обновить</button>
+      <button onclick="refreshAll()">Обновить</button>
     </div>
     <div class="timestamp" id="last-updated"></div>
-    <div class="last-wipe" id="last-wipe">Дата последнего вайпа: Неизвестно</div> <!-- Блок для даты вайпа -->
+    <div class="last-wipe" id="last-wipe">Дата последнего вайпа: Неизвестно</div>
   </div>
 
-  <div class="discord-panel" id="discord-panel">
-    <div>
-      <h2>Discord-сервер</h2>
-      <p>Следите за онлайном и получайте уведомления в Discord! У нас работает бот с:</p>
-      <ul>
-        <li>🔔 Моментальным обновлением онлайна</li>
-        <li>👥 Подписками на игроков</li>
-        <li>📬 Уведомлениями о входе/выходе друзей</li>
-      </ul>
+  <div class="discord-panel" id="activity-panel">
+    <h2>Активность игроков</h2>
+    <div class="players" id="activity-list">
+      <div class="player">Загрузка…</div>
     </div>
-    <iframe class="discord-widget" src="https://discord.com/widget?id=1360566172936048843&theme=dark" allowtransparency="true"></iframe>
   </div>
 
   <script>
     const DEFAULT_HEAD = 'steve.png';
     const API_URL = 'https://mcstatus-api-iena.onrender.com/api/status';
-    const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic",];
+    const ACTIVITY_API = 'https://mcstatus-api-iena.onrender.com/api/activity';
+    const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic"];
     const VIPS = ["Egzotik"];
     const ADMINS = ["C4acTJluBa9l"];
+
+    // Навигация в профиль
+    function goToProfile(playerName) {
+      if (!playerName) return;
+      window.location.href = `profile.html?player=${encodeURIComponent(playerName)}`;
+    }
+
+    // Поиск по Enter
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = searchInput.value.trim();
+        if (val) goToProfile(val);
+      }
+    });
+
+    function refreshAll() {
+      fetchStatus();
+      fetchActivity();
+    }
 
     async function fetchStatus() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        const online = data.status === "online"; // проверяем статус
+        const online = data.status === "online";
         const count = data.players?.online || 0;
         const max = data.players?.max || 0;
 
         document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
-        document.getElementById('status-indicator').className =
-          'status-badge ' + (online ? '' : 'status-offline');
-
-        document.getElementById('status-count').textContent = `${count}/${max}`;
-        document.getElementById('progress-bar').style.width = `${(count / max) * 100}%`;
+        document.getElementById('status-indicator').className = 'status-badge ' + (online ? '' : 'status-offline');
+        document.getElementById('progress-bar').style.width = max ? `${(count / max) * 100}%` : '0%';
 
         const players = data.players?.list || [];
         const list = document.getElementById('online-list');
-
-        list.innerHTML = players.length
-          ? ''
-          : '<div class="player">Нет игроков онлайн</div>';
+        list.innerHTML = players.length ? '' : '<div class="player">Нет игроков онлайн</div>';
 
         players.forEach(name => {
           const div = document.createElement('div');
           div.className = 'player';
-
           if (MODERATORS.includes(name)) div.classList.add('moderator');
           if (VIPS.includes(name)) div.classList.add('vip');
           if (ADMINS.includes(name)) div.classList.add('admin');
@@ -274,7 +267,77 @@
 
           const img = new Image();
           img.crossOrigin = 'anonymous';
+
           img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
+          img.onload = () => draw(img, ctx);
+          img.onerror = () => {
+            const imgLower = new Image();
+            imgLower.crossOrigin = 'anonymous';
+            imgLower.src = `https://files.mix-servers.com/web/skins/${name.toLowerCase()}.png`;
+            imgLower.onload = () => draw(imgLower, ctx);
+            imgLower.onerror = () => {
+              const stub = new Image();
+              stub.src = DEFAULT_HEAD;
+              stub.onload = () => draw(stub, ctx);
+            };
+          };
+
+          function draw(img, ctx) {
+            const s = img.width / 64;
+            ctx.clearRect(0, 0, 32, 32);
+            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
+            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
+          }
+
+          const label = document.createElement('span');
+          label.textContent = name;
+          label.title = name;
+
+          div.append(canvas, label);
+
+          div.addEventListener('click', () => {
+            goToProfile(name);
+          });
+
+          list.append(div);
+        });
+
+        const motd = data.motd || "";
+        const lastWipe = motd.includes('wipe') ? motd.split(' ')[1] : 'Неизвестно';
+        document.getElementById('last-wipe').textContent = `Дата последнего вайпа: ${lastWipe}`;
+
+        const now = new Date();
+        document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
+      } catch (error) {
+        console.error('Ошибка получения статуса сервера:', error);
+      }
+    }
+
+    async function fetchActivity() {
+      try {
+        const res = await fetch(ACTIVITY_API);
+        const json = await res.json();
+        const activities = json.activity || [];
+        const container = document.getElementById('activity-list');
+        container.innerHTML = '';
+
+        activities.forEach(({ action, player }) => {
+          const div = document.createElement('div');
+          div.className = 'player';
+
+          const indicator = document.createElement('div');
+          indicator.className = 'activity-indicator ' + (action === 'joined' ? 'activity-joined' : 'activity-left');
+
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 32;
+          canvas.className = 'head';
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+
+          img.src = `https://files.mix-servers.com/web/skins/${player}.png`;
           img.onload = () => draw(img, ctx);
           img.onerror = () => {
             const stub = new Image();
@@ -283,45 +346,34 @@
           };
 
           function draw(img, ctx) {
-            if (img.width === 64 && img.height === 32) {
-              ctx.drawImage(img, 8,8,8,8, 0,0,32,32);
-              ctx.drawImage(img,40,8,8,8, 0,0,32,32);
-            } else {
-              const s = img.width / 64;
-              ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
-              ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
-            }
+            const s = img.width / 64;
+            ctx.clearRect(0, 0, 32, 32);
+            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
+            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
           }
 
           const label = document.createElement('span');
-          label.textContent = name;
-          label.title = name;
+          label.innerHTML = `<strong>${player}</strong><br><small>${action === 'joined' ? 'Зашел на сервер!' : 'Вышел с сервера!'}</small>`;
 
-          div.append(canvas, label);
-          list.append(div);
+          div.append(canvas, label, indicator);
+          container.append(div);
         });
 
-        // Дата последнего вайпа из MOTD
-        const motd = data.motd || "";
-        const lastWipe = motd.includes('wipe') ? motd.split(' ')[1] : 'Неизвестно';
-        document.getElementById('last-wipe').textContent = `Дата последнего вайпа: ${lastWipe}`;
+        const playerDivs = container.querySelectorAll('.player');
+        const total = playerDivs.length;
 
-        const now = new Date();
-        document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString()}`;
+        if (total >= 1) playerDivs[total - 1].style.opacity = '0.25';
+        if (total >= 2) playerDivs[total - 2].style.opacity = '0.5';
+        if (total >= 3) playerDivs[total - 3].style.opacity = '0.75';
       } catch (error) {
-        console.error('Ошибка получения статуса сервера:', error);
-        document.getElementById('status-indicator').textContent = 'OFFLINE';
-        document.getElementById('status-indicator').className = 'status-badge status-offline';
-        document.getElementById('status-count').textContent = '0/0';
-        document.getElementById('progress-bar').style.width = '0%';
-        document.getElementById('online-list').innerHTML = '<div class="player">Сервер недоступен</div>';
-        document.getElementById('last-updated').textContent = `Последнее обновление: ${new Date().toLocaleTimeString()}`;
-        document.getElementById('last-wipe').textContent = 'Дата последнего вайпа: Неизвестно';
+        console.error('Ошибка загрузки активности:', error);
       }
     }
 
     fetchStatus();
-    setInterval(fetchStatus, 60000); //#60 секунд
+    fetchActivity();
+    setInterval(fetchStatus, 60000);
+    setInterval(fetchActivity, 60000);
   </script>
 </body>
 </html>
