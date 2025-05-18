@@ -96,7 +96,6 @@
   <script>
     const DEFAULT_HEAD = 'steve.png';
 
-    // Получить ник из параметров URL
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
@@ -132,17 +131,18 @@
           statusElem.textContent = 'Игрок давно не заходил!';
           statusWrapper.classList.add('offline');
           lastLeftElem.textContent = '';
-          // Показываем заглушку скина
           const stub = new Image();
           stub.src = DEFAULT_HEAD;
           stub.onload = () => drawHead(stub, ctx);
           return;
         }
 
-        // Попытка загрузить скин игрока
+        // Используем ник с правильным регистром из API для загрузки скина
+        const correctPlayerName = data.player;
+
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = `https://files.mix-servers.com/web/skins/${playerName}.png`;
+        img.src = `https://files.mix-servers.com/web/skins/${correctPlayerName}.png`;
         img.onerror = () => {
           const stub = new Image();
           stub.src = DEFAULT_HEAD;
