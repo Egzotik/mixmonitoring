@@ -187,9 +187,26 @@
       color: #b0b3b8;
       text-align: center;
     }
+    .nav-button {
+      background: #4752c4;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .nav-button:hover {
+      background: #5865f2;
+    }
+
   </style>
 </head>
 <body>
+
   <div class="card" id="main-card">
     <div class="logo-container">
       <img src="logo.png" alt="Логотип сервера" class="logo" />
@@ -199,8 +216,12 @@
         <h1>Industrial</h1>
         <div id="status-indicator" class="status-badge">ONLINE</div>
       </div>
-      <input type="text" class="search-input" placeholder="Поиск" id="searchInput" />
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" class="search-input" placeholder="Поиск" id="searchInput" />
+        <a href="https://egzotik.github.io/mixcraft/" class="nav-button">Калькулятор крафтов</a>
+      </div>
     </div>
+
     <div id="online-stats">
       <span>Текущий онлайн: <strong id="current-online">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
       <span>Пиковый онлайн сегодня: <strong id="peak-today">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -333,63 +354,6 @@
         document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
       } catch (error) {
         console.error('Ошибка получения статуса сервера:', error);
-      }
-    }
-
-    async function fetchActivity() {
-      try {
-        const res = await fetch(ACTIVITY_API);
-        const json = await res.json();
-        const activities = json.activity || [];
-        const container = document.getElementById('activity-list');
-        container.innerHTML = '';
-
-        activities.forEach(({ action, player }) => {
-          const div = document.createElement('div');
-          div.className = 'player';
-
-          const indicator = document.createElement('div');
-          indicator.className = 'activity-indicator ' + (action === 'joined' ? 'activity-joined' : 'activity-left');
-
-          const canvas = document.createElement('canvas');
-          canvas.width = canvas.height = 32;
-          canvas.className = 'head';
-          const ctx = canvas.getContext('2d');
-          ctx.imageSmoothingEnabled = false;
-
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-
-          img.src = `https://files.mix-servers.com/web/skins/${player}.png`;
-          img.onload = () => draw(img, ctx);
-          img.onerror = () => {
-            const stub = new Image();
-            stub.src = DEFAULT_HEAD;
-            stub.onload = () => draw(stub, ctx);
-          };
-
-          function draw(img, ctx) {
-            const s = img.width / 64;
-            ctx.clearRect(0, 0, 32, 32);
-            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
-            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
-          }
-
-          const label = document.createElement('span');
-          label.innerHTML = `<strong>${player}</strong><br><small>${action === 'joined' ? 'Зашел на сервер!' : 'Вышел с сервера!'}</small>`;
-
-          div.append(canvas, label, indicator);
-          container.append(div);
-        });
-
-        const playerDivs = container.querySelectorAll('.player');
-        const total = playerDivs.length;
-
-        if (total >= 1) playerDivs[total - 1].style.opacity = '0.25';
-        if (total >= 2) playerDivs[total - 2].style.opacity = '0.5';
-        if (total >= 3) playerDivs[total - 3].style.opacity = '0.75';
-      } catch (error) {
-        console.error('Ошибка загрузки активности:', error);
       }
     }
 
