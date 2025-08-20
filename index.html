@@ -12,15 +12,12 @@
       color: #ffffff;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
-      flex-direction: row;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
       padding: 40px 20px;
-      gap: 40px;
-      flex-wrap: wrap;
     }
-    .card, .discord-panel {
+    .card {
       background: #313338;
       border-radius: 16px;
       padding: 24px;
@@ -32,24 +29,28 @@
       display: flex;
       flex-direction: column;
     }
-    .card:hover, .discord-panel:hover {
-      transform: translateY(-2px);
-    }
+    .card:hover { transform: translateY(-2px); }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
+      flex-wrap: nowrap; /* ❌ запрещаем перенос */
+      gap: 10px;
     }
-    .header-left {
+    .header-right {
       display: flex;
+      gap: 10px;
       align-items: center;
-      gap: 12px; /* Отступ между элементами внутри header-left */
+      flex-shrink: 1; /* ✅ позволяет сжиматься */
     }
-    h1 {
-      font-size: 20px;
-      color: #ffffff;
+    .search-input {
+      flex: 1; /* ✅ поле поиска растягивается */
+      min-width: 120px; /* чтобы не исчезало */
     }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    h1 { font-size: 20px; color: #ffffff; }
     .status-badge {
       padding: 6px 14px;
       border-radius: 9999px;
@@ -57,14 +58,9 @@
       font-weight: 600;
       background-color: #2f9b2a;
       color: #fff;
-      transition: background 0.3s ease;
-      /* Добавляем правый отступ, чтобы создать пробел */
-      margin-right: 12px;
       white-space: nowrap;
     }
-    .status-offline {
-      background-color: #ed4245;
-    }
+    .status-offline { background-color: #ed4245; }
     .search-input {
       background: #232428;
       color: #ffffff;
@@ -75,6 +71,18 @@
       width: 100%;
       max-width: 250px;
     }
+    .nav-button {
+      background: #4752c4;
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+      white-space: nowrap;
+    }
+    .nav-button:hover { background: #5865f2; }
     #online-stats {
       color: #b0b3b8;
       font-size: 14px;
@@ -106,15 +114,13 @@
       padding: 8px 12px;
       border-radius: 8px;
       transition: background 0.2s;
-      overflow: hidden;
       border: 2px solid transparent;
-      position: relative;
       cursor: pointer;
     }
+    .player:hover { background: #2b2d31; }
     .player.moderator { border-color: #ed4245; }
     .player.vip { border-color: #ffaa00; }
     .player.admin { border-color: #5865f2; }
-    .player:hover { background: #2b2d31; }
     .player .head {
       width: 32px;
       height: 32px;
@@ -126,24 +132,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 100%;
       font-size: 14px;
     }
-    .activity-indicator {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 4px;
-      height: 100%;
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
-    .activity-joined { background-color: #2f9b2a; }
-    .activity-left { background-color: #ed4245; }
     .refresh-button {
-      text-align: center;
+      display: flex;
+      justify-content: center; /* центр по горизонтали */
       margin-top: 30px;
     }
+
     .refresh-button button {
       background: #5865f2;
       border: none;
@@ -154,16 +150,22 @@
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
-    }
-    .refresh-button button:hover {
-      background-color: #4752c4;
-    }
-    .discord-panel {
-      max-width: 350px;
       display: flex;
-      flex-direction: column;
-      font-size: 14px;
-      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .refresh-button button:hover { background-color: #4752c4; }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
     }
     .timestamp {
       margin-top: 12px;
@@ -171,42 +173,41 @@
       color: #b0b3b8;
       text-align: center;
     }
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    .logo {
-      max-width: 100%;
-      height: auto;
-    }
+    .logo-container { display: flex; justify-content: center; margin-bottom: 24px; }
+    .logo { max-width: 100%; height: auto; }
     .last-wipe {
       margin-top: 10px;
       font-size: 14px;
       color: #b0b3b8;
       text-align: center;
     }
-    .nav-button {
-      background: #4752c4;
-      color: #ffffff;
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.3s ease;
-      white-space: nowrap;
-    }
-
-    .nav-button:hover {
-      background: #5865f2;
+    /* 📱 Адаптивность */
+    @media(max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: center; /* центрируем содержимое */
+        gap: 12px;
+      }
+      .header-left {
+        justify-content: center;
+      }
+      .header-right {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+      }
+      .search-input {
+        flex: 1; /* растягиваем на всю ширину */
+      }
+      .nav-button {
+        flex-shrink: 0; /* кнопка фиксированного размера */
+      }
     }
 
   </style>
 </head>
 <body>
-
   <div class="card" id="main-card">
     <div class="logo-container">
       <img src="logo.png" alt="Логотип сервера" class="logo" />
@@ -216,21 +217,24 @@
         <h1>Industrial</h1>
         <div id="status-indicator" class="status-badge">ONLINE</div>
       </div>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" class="search-input" placeholder="Поиск" id="searchInput" />
+      <div class="header-right">
+        <input type="text" class="search-input" placeholder="Введите ник" id="searchInput" />
         <a href="https://egzotik.github.io/mixcraft/" class="nav-button">Калькулятор крафтов</a>
       </div>
     </div>
 
+
     <div id="online-stats">
-      <span>Текущий онлайн: <strong id="current-online">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
-      <span>Пиковый онлайн сегодня: <strong id="peak-today">0</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
-      <span>Пиковый онлайн вчера: <strong id="peak-yesterday">0</strong></span>
+      <span>Текущий онлайн: <strong id="current-online">0</strong></span> &nbsp;|&nbsp;
+      <span>Пик сегодня: <strong id="peak-today">0</strong></span> &nbsp;|&nbsp;
+      <span>Пик вчера: <strong id="peak-yesterday">0</strong></span>
     </div>
     <div class="progress"><div class="progress-fill" id="progress-bar"></div></div>
+
     <div class="players" id="online-list"><div class="player">Загрузка…</div></div>
+
     <div class="refresh-button">
-      <button onclick="refreshAll()">Обновить</button>
+      <button id="refresh-btn"><span>Обновить</span></button>
     </div>
     <div class="timestamp" id="last-updated"></div>
     <div class="last-wipe" id="last-wipe">Дата последнего вайпа: Неизвестно</div>
@@ -239,43 +243,69 @@
   <script>
     const DEFAULT_HEAD = 'steve.png';
     const API_URL = 'https://mcstatus-api-iena.onrender.com/api/status';
-    const ACTIVITY_API = 'https://mcstatus-api-iena.onrender.com/api/activity';
     const PEAK_API = 'https://mcstatus-api-iena.onrender.com/api/peak';
     const MODERATORS = ["fun_", "__DeD__", "Ferme_2015", "Grayson", "MorTic"];
     const VIPS = ["Egzotik"];
     const ADMINS = ["C4acTJluBa9l"];
 
-    // Навигация в профиль
-    function goToProfile(playerName) {
-      if (!playerName) return;
-      window.location.href = `profile.html?player=${encodeURIComponent(playerName)}`;
+    const refreshBtn = document.getElementById('refresh-btn');
+    const refreshText = refreshBtn.querySelector('span');
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        refreshText.textContent = "Загрузка";
+        const spinner = document.createElement("div");
+        spinner.className = "spinner";
+        refreshBtn.appendChild(spinner);
+        refreshBtn.disabled = true;
+      } else {
+        refreshText.textContent = "Обновить";
+        const spinner = refreshBtn.querySelector(".spinner");
+        if (spinner) spinner.remove();
+        refreshBtn.disabled = false;
+      }
     }
 
-    // Поиск по Enter
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('keydown', (e) => {
+    function renderPlayerHead(name, canvas, fallback = DEFAULT_HEAD) {
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      function draw(img) {
+        const s = img.width / 64;
+        ctx.clearRect(0, 0, 32, 32);
+        ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
+        ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
+      img.onload = () => draw(img);
+      img.onerror = () => {
+        const stub = new Image();
+        stub.src = fallback;
+        stub.onload = () => draw(stub);
+      };
+    }
+
+    function goToProfile(playerName) {
+      if (playerName) window.location.href = `profile.html?player=${encodeURIComponent(playerName)}`;
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        const val = searchInput.value.trim();
+        const val = e.target.value.trim();
         if (val) goToProfile(val);
       }
     });
-
-    function refreshAll() {
-      fetchStatus();
-      fetchActivity();
-      fetchPeak();
-    }
 
     async function fetchPeak() {
       try {
         const res = await fetch(PEAK_API);
         const data = await res.json();
-
         document.getElementById('peak-today').textContent = data.today || 0;
         document.getElementById('peak-yesterday').textContent = data.yesterday || 0;
-      } catch (error) {
-        console.error('Ошибка загрузки пикового онлайна:', error);
-      }
+      } catch (err) { console.error('Ошибка peak:', err); }
     }
 
     async function fetchStatus() {
@@ -287,13 +317,13 @@
         const max = data.players?.max || 0;
 
         document.getElementById('current-online').textContent = count;
+        const statusEl = document.getElementById('status-indicator');
+        statusEl.textContent = online ? 'ONLINE' : 'OFFLINE';
+        statusEl.className = 'status-badge ' + (online ? '' : 'status-offline');
+        document.getElementById('progress-bar').style.width = max ? `${(count/max)*100}%` : '0%';
 
-        document.getElementById('status-indicator').textContent = online ? 'ONLINE' : 'OFFLINE';
-        document.getElementById('status-indicator').className = 'status-badge ' + (online ? '' : 'status-offline');
-        document.getElementById('progress-bar').style.width = max ? `${(count / max) * 100}%` : '0%';
-
-        const players = data.players?.list || [];
         const list = document.getElementById('online-list');
+        const players = data.players?.list || [];
         list.innerHTML = players.length ? '' : '<div class="player">Нет игроков онлайн</div>';
 
         players.forEach(name => {
@@ -306,43 +336,13 @@
           const canvas = document.createElement('canvas');
           canvas.width = canvas.height = 32;
           canvas.className = 'head';
-          const ctx = canvas.getContext('2d');
-          ctx.imageSmoothingEnabled = false;
-
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-
-          img.src = `https://files.mix-servers.com/web/skins/${name}.png`;
-          img.onload = () => draw(img, ctx);
-          img.onerror = () => {
-            const imgLower = new Image();
-            imgLower.crossOrigin = 'anonymous';
-            imgLower.src = `https://files.mix-servers.com/web/skins/${name.toLowerCase()}.png`;
-            imgLower.onload = () => draw(imgLower, ctx);
-            imgLower.onerror = () => {
-              const stub = new Image();
-              stub.src = DEFAULT_HEAD;
-              stub.onload = () => draw(stub, ctx);
-            };
-          };
-
-          function draw(img, ctx) {
-            const s = img.width / 64;
-            ctx.clearRect(0, 0, 32, 32);
-            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
-            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
-          }
+          renderPlayerHead(name, canvas);
 
           const label = document.createElement('span');
           label.textContent = name;
-          label.title = name;
 
           div.append(canvas, label);
-
-          div.addEventListener('click', () => {
-            goToProfile(name);
-          });
-
+          div.onclick = () => goToProfile(name);
           list.append(div);
         });
 
@@ -350,70 +350,18 @@
         const lastWipe = motd.includes('wipe') ? motd.split(' ')[1] : 'Неизвестно';
         document.getElementById('last-wipe').textContent = `Дата последнего вайпа: ${lastWipe}`;
 
-        const now = new Date();
-        document.getElementById('last-updated').textContent = `Последнее обновление: ${now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
-      } catch (error) {
-        console.error('Ошибка получения статуса сервера:', error);
-      }
+        document.getElementById('last-updated').textContent =
+          `Последнее обновление: ${new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+      } catch (err) { console.error('Ошибка status:', err); }
     }
 
-    async function fetchActivity() {
-      try {
-        const res = await fetch(ACTIVITY_API);
-        const json = await res.json();
-        const activities = json.activity || [];
-        const container = document.getElementById('activity-list');
-        container.innerHTML = '';
-
-        activities.forEach(({ action, player }) => {
-          const div = document.createElement('div');
-          div.className = 'player';
-
-          const indicator = document.createElement('div');
-          indicator.className = 'activity-indicator ' + (action === 'joined' ? 'activity-joined' : 'activity-left');
-
-          const canvas = document.createElement('canvas');
-          canvas.width = canvas.height = 32;
-          canvas.className = 'head';
-          const ctx = canvas.getContext('2d');
-          ctx.imageSmoothingEnabled = false;
-
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-
-          img.src = `https://files.mix-servers.com/web/skins/${player}.png`;
-          img.onload = () => draw(img, ctx);
-          img.onerror = () => {
-            const stub = new Image();
-            stub.src = DEFAULT_HEAD;
-            stub.onload = () => draw(stub, ctx);
-          };
-
-          function draw(img, ctx) {
-            const s = img.width / 64;
-            ctx.clearRect(0, 0, 32, 32);
-            ctx.drawImage(img, 8*s,8*s,8*s,8*s, 0,0,32,32);
-            ctx.drawImage(img,40*s,8*s,8*s,8*s, 0,0,32,32);
-          }
-
-          const label = document.createElement('span');
-          label.innerHTML = `<strong>${player}</strong><br><small>${action === 'joined' ? 'Зашел на сервер!' : 'Вышел с сервера!'}</small>`;
-
-          div.append(canvas, label, indicator);
-          container.append(div);
-        });
-
-        const playerDivs = container.querySelectorAll('.player');
-        const total = playerDivs.length;
-
-        if (total >= 1) playerDivs[total - 1].style.opacity = '0.25';
-        if (total >= 2) playerDivs[total - 2].style.opacity = '0.5';
-        if (total >= 3) playerDivs[total - 3].style.opacity = '0.75';
-      } catch (error) {
-        console.error('Ошибка загрузки активности:', error);
-      }
+    async function refreshAll() {
+      setLoading(true);
+      await Promise.all([fetchStatus(), fetchPeak()]);
+      setLoading(false);
     }
 
+    refreshBtn.addEventListener("click", refreshAll);
     refreshAll();
     setInterval(refreshAll, 60000);
   </script>
